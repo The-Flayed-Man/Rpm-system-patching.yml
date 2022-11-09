@@ -1,0 +1,26 @@
+---
+ - name: RPM patching
+   hosts: ssh
+   become_method: sudo
+   gather_facts: false
+   tasks:
+     - name: Patch server
+       dnf:
+         name: "*"
+         state: latest
+     
+     - name: Reboot server after kernel patching
+       command: /usr/sbin/shutdown -r now "Ansible triggered reboot due to kernel updates"
+       async: 1
+       poll: 0
+
+     - name: wait for 70 seconds
+       pause:
+         seconds: 70
+
+     - name: Wait for system to reboot after patching
+       wait_for_connection:
+         connect_timeout: 20
+         sleep: 5
+         delay: 5
+         timeout: 140    
